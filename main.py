@@ -2,45 +2,35 @@ from  datetime import datetime, timedelta
 
 def get_birthdays_per_week(users):
 
-    BIRTHDATE_SCOPE = 7
-    birthdays_dict = dict()
-
+    BIRTHDATE_SCOPE = 7 # today and next 6 days
     today_date = datetime.today().date()
-    # today_week_day_number = today_date.week()
-    # start_next_week_date = today_date
 
+    birthdays_dict = dict()
     for user in users:
+
         name = user["name"]
-        birthday = user["birthday"].date()  # Конвертуємо до типу date
-        birthday_this_year = birthday.replace(year=today_date.year)
-        day_delta = (birthday_this_year - today_date).days
+        birthday_this_year = user["birthday"].date().replace(year=today_date.year)
+
         weekday = birthday_this_year.weekday()
+        if weekday in [5, 6]: # 5, 6 = saturday, sunday
+            birthday_this_year = birthday_this_year + timedelta(days=(7 - weekday))
 
-        if day_delta < BIRTHDATE_SCOPE:
+        day_delta = (birthday_this_year - today_date).days # days from today to birthday
+        if 0 <= day_delta and day_delta < BIRTHDATE_SCOPE:
 
-            if weekday in [5, 6]:
-                birthday_this_year = birthday_this_year + timedelta(days=(7 - weekday))
-
-        if (weekday in birthdays_dict):
-            birthdays_dict[weekday].append(name)
-        else:
-            birthdays_dict[weekday] = [name] 
-
-    print(birthdays_dict)
+            if birthday_this_year not in birthdays_dict:
+                birthdays_dict[birthday_this_year] = name + ", " # for first date in dict
+            else:
+                birthdays_dict[birthday_this_year] += name + ", " # for second and too late dates in dict
 
     days_list = [i for i in birthdays_dict.keys()]
 
     days_list.sort()
 
-    print(days_list)
-
-    print_text = ''
+    print_text = f"\nBirthdays in next {BIRTHDATE_SCOPE} days:\n-------------------------\n"
 
     for day in days_list:
-        for name in day:
-            t = ', '.join(birthdays_dict[day]).rstrip(', ') # !!!!!!!!!1
-
-        print_text += f'{birthdays_dict[weekday]}: {t}\n'
+        print_text += f"{day.strftime('%A'):>10}: {birthdays_dict[day].rstrip(', ')}\n"
 
     return print_text
 
@@ -50,24 +40,24 @@ def main():
     while True:
         command = input("Enter a command: ").strip().lower()
 
-        if command in ["close", "exit"]:
+        if command in ["close", "exit", 'quit', 'e']:
             print("Good bye!")
             break
 
         elif command == "hello":
             print("How can I help you?")
 
-        elif command == "1":
+        elif command in ["birthdays", 'b']:
             print(get_birthdays_per_week(test_list))
 
         else:
-            print("Invalid command.")
+            print("Invalid command!")
 
 
 test_list = [
-    {"name": "Bill Gates", "birthday": datetime(2024, 3, 3)},
-    {"name": "Elon Mask", "birthday": datetime(2024, 10, 15)},
-    {"name": "Bill Clinton", "birthday": datetime(2024, 2, 29)},
+    {"name": "Bill Gates", "birthday": datetime(2024, 2, 26)},
+    {"name": "Elon Mask", "birthday": datetime(2024, 3, 5)},
+    {"name": "Bill Clinton", "birthday": datetime(2024, 3, 3)},
 ]
 
 if __name__ == "__main__":
