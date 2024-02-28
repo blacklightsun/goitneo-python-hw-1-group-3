@@ -1,15 +1,18 @@
 from  datetime import datetime, timedelta
 
-def get_birthdays_per_week(users):
+def get_birthdays_per_week(contacts):
+
+    if len(contacts) == 0:
+        return '\nNobody is in your contact list (((\n'
 
     BIRTHDATE_SCOPE = 7 # today and next 6 days
     today_date = datetime.today().date()
 
     birthdays_dict = dict()
-    for user in users:
+    for contact in contacts:
 
-        name = user["name"]
-        birthday_this_year = user["birthday"].date().replace(year=today_date.year)
+        name = contact["name"]
+        birthday_this_year = contact["birthday"].date().replace(year=today_date.year)
 
         weekday = birthday_this_year.weekday()
         if weekday in [5, 6]: # 5, 6 = saturday, sunday
@@ -25,12 +28,15 @@ def get_birthdays_per_week(users):
 
     days_list = [i for i in birthdays_dict.keys()]
 
+    if len(days_list) == 0:
+        return f"\nNo one celebrates their birthday in next {BIRTHDATE_SCOPE} days(((\nThrow a party for yourself!!!\n"
+
     days_list.sort()
 
     print_text = f"\nBirthdays in next {BIRTHDATE_SCOPE} days:\n-------------------------\n"
 
     for day in days_list:
-        print_text += f"{day.strftime('%A'):>10}: {birthdays_dict[day].rstrip(', ')}\n"
+        print_text += f"{str(day.strftime('%A'))+":":<12} {birthdays_dict[day].rstrip(', ')}\n"
 
     return print_text
 
@@ -56,8 +62,8 @@ def main():
 
 test_list = [
     {"name": "Bill Gates", "birthday": datetime(2024, 2, 26)},
-    {"name": "Elon Mask", "birthday": datetime(2024, 3, 5)},
-    {"name": "Bill Clinton", "birthday": datetime(2024, 3, 3)},
+    {"name": "Elon Mask", "birthday": datetime(2024, 2, 5)},
+    {"name": "Bill Clinton", "birthday": datetime(2024, 2, 3)},
 ]
 
 if __name__ == "__main__":
