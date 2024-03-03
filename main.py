@@ -6,6 +6,7 @@ def get_birthdays_per_week(contacts):
         return '\nNobody is in your contact list (((\n'
 
     BIRTHDATE_SCOPE = 7 # today and next 6 days
+    WEEKENDS = (5, 6) # 5, 6 = saturday, sunday
     today_date = datetime.today().date()
 
     birthdays_dict = dict()
@@ -15,7 +16,7 @@ def get_birthdays_per_week(contacts):
         birthday_this_year = contact["birthday"].date().replace(year=today_date.year)
 
         weekday = birthday_this_year.weekday()
-        if weekday in [5, 6]: # 5, 6 = saturday, sunday
+        if weekday in WEEKENDS: # 5, 6 = saturday, sunday
             birthday_this_year = birthday_this_year + timedelta(days=(7 - weekday))
 
         day_delta = (birthday_this_year - today_date).days # days from today to birthday
@@ -53,7 +54,7 @@ def main():
         elif command == "hello":
             print("How can I help you?")
 
-        elif command in ["birthdays", 'b']:
+        elif command in ["birthdays", 'bd']:
             print(get_birthdays_per_week(test_list))
 
         else:
@@ -61,9 +62,9 @@ def main():
 
 
 test_list = [
-    {"name": "Bill Gates", "birthday": datetime(2024, 2, 26)},
-    {"name": "Elon Mask", "birthday": datetime(2024, 2, 5)},
-    {"name": "Bill Clinton", "birthday": datetime(2024, 2, 3)},
+    {"name": "Bill Gates", "birthday": datetime(2024, 3, 26)},
+    {"name": "Elon Mask", "birthday": datetime(2024, 3, 5)},
+    {"name": "Bill Clinton", "birthday": datetime(2024, 3, 3)},
 ]
 
 if __name__ == "__main__":
