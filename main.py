@@ -1,7 +1,16 @@
+
 from  datetime import datetime, timedelta
-import re
 #################### New Part ######################################
 from collections import UserDict
+
+def input_error(func):
+    def inner(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception:
+            print("Give me a valid (lenght > 0, only characters or digits) name\n and/or valid (ten digits) phone number please.")
+    return inner
+# other errors that cause an exception are not yet expected by logic
 
 class Field:
     """
@@ -33,10 +42,10 @@ class Name(Field):
 
     @value.setter
     def value(self, new_value):
-        if new_value.isalnum() and new_value is not None:
+        if new_value.isalfa() and new_value is not None:
             self.__value = new_value
         else:
-            print("Name can't be empty!")
+            print("Name can't be empty and must contains characters only")
 
 
 class Phone(Field):
@@ -59,7 +68,7 @@ class Phone(Field):
         if new_value.isdigit() and len(new_value) == 10:
             self.__value = new_value
         else:
-            print("Only ten digit for phone numder")
+            print("Ten digit for phone numder only")
 
 
 class Record:
@@ -84,7 +93,7 @@ class Record:
         for p in self.phones:
             if phone == p.value:
                 return p
-        
+
     def add_phone(self, new_phone: str):
         '''
         Recieve a 'phone' string.
@@ -114,7 +123,7 @@ class Record:
                 print(f'{old_phone} is changed to {new_phone} for {self.name}.')
             else:
                 print(f'{self.name} haven\'t got the {new_phone} phone number.')
-        
+ 
     def remove_phone(self, del_phone: str):
         '''
         Recieve a 'del_phone' string.
@@ -131,6 +140,8 @@ class Record:
     def __str__(self):
         return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones).rstrip('; ')}"
 
+
+
 class AddressBook(UserDict):
     '''
     Objects of the class allow to do:
@@ -142,6 +153,7 @@ class AddressBook(UserDict):
     Objects of the class are can processed as separate objects to downloading/saving to a disk, for copying, etc.
     '''
 
+    @input_error
     def find(self, name: str):
         '''
         Recieve a 'name' string.
@@ -150,6 +162,7 @@ class AddressBook(UserDict):
         if name in self.data:
             return self.data[name]
 
+    @input_error
     def delete(self, del_name: str):
         '''
         Recieve a 'del_name' string.
@@ -239,7 +252,7 @@ def get_help():
     print(help_string)
 
 
-
+@input_error
 def add_contact(name: str, args: tuple):
     '''
     This function recieves a tuple with a contact name and a tuple with phone numbers,
@@ -252,6 +265,7 @@ def add_contact(name: str, args: tuple):
 
 
 
+@input_error
 def change_contact(name: str, args: tuple):
     '''
     This function recieves a tuple with a contact name and a tuple with old and new phone numbers,
@@ -274,6 +288,7 @@ def show_all():
 
 
 
+@input_error
 def show_phone(name: str):
     '''
     This function recieves a contact name and print Record object.

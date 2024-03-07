@@ -1,3 +1,5 @@
+# file for writting classes only
+
 from collections import UserDict
 
 class Field:
