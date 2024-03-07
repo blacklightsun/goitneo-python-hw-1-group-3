@@ -1,13 +1,12 @@
-from  datetime import datetime, timedelta
-import re
-#################### New Part ######################################
 from collections import UserDict
 
 class Field:
     """
     Objects of the class allow to do:
     - keep contact data: some value.
+
     Field have got the following attribute(s): a value.
+
     Objects of the class is can processed as a parent for items of the Record object.
     """
     def __init__(self, value):
@@ -20,7 +19,9 @@ class Name(Field):
     """
     Objects of the class allow to do:
     - keep contact name: as specific value for Field .
+
     Field have got the following attribute(s): a value.
+
     Objects of the class is can processed as a specific item of the Record object.
     """
     def __init__(self, value: str):
@@ -33,7 +34,7 @@ class Name(Field):
 
     @value.setter
     def value(self, new_value):
-        if new_value.isalnum() and new_value is not None:
+        if new_value.isalnum() and len(new_value) > 0:
             self.__value = new_value
         else:
             print("Name can't be empty!")
@@ -43,7 +44,9 @@ class Phone(Field):
     """
     Objects of the class allow to do:
     - keep contact phone number: as specific value for Field .
+
     Field have got the following attribute(s): a value.
+
     Objects of the class is can processed as a specific item of the Record object.
     """
     def __init__(self, value: str):
@@ -69,7 +72,9 @@ class Record:
     - find and return object 'phone',
     - add new object 'phone',
     - delete object 'phone'.
+
     Records have got the following attributes: a name as object, a list of phone number objects.
+
     Objects of the class is can processed as item of AddressBook object.
     '''
     def __init__(self, name: str):
@@ -138,7 +143,9 @@ class AddressBook(UserDict):
     - find and return record as object,
     - add new records,
     - delete record as object.
+
     Records keep as items of a dict. Dict's keys are a name of the record, dict's values are the record as the object.
+
     Objects of the class are can processed as separate objects to downloading/saving to a disk, for copying, etc.
     '''
 
@@ -175,158 +182,3 @@ class AddressBook(UserDict):
         else:
             self.data[new_name.name] = new_name
             print(f'Contact {new_name.name} is added.')
-
-########################## End of New Part ###############################
-
-def get_birthdays_per_week():
-    '''
-    This function recieves a contact list and returns a list of contacts with birthdays
-    today and next 6 days.
-    If birthday will be on weekends (Saturday, Sunday) then birthday message would move
-    on next Monday.
-    '''
-
-    if len(contacts) == 0:
-        return '\nNobody is in your contact list. (((\n'
-
-    BIRTHDATE_SCOPE = 7 # today and next 6 days
-    WEEKENDS = (5, 6) # 5, 6 = saturday, sunday
-    today_date = datetime.today().date()
-
-    birthdays_dict = dict()
-    for contact in contacts:
-
-        
-        if contact["birthday"] is not None: # checking for empty birthday
-            birthday_this_year = contact["birthday"].date().replace(year=today_date.year)
-        else:
-            break
-
-        weekday = birthday_this_year.weekday()
-        if weekday in WEEKENDS: 
-            birthday_this_year = birthday_this_year + timedelta(days=(7 - weekday)) # move to Monday
-
-        day_delta = (birthday_this_year - today_date).days # days from today to birthday
-        if 0 <= day_delta and day_delta < BIRTHDATE_SCOPE:
-
-            name = contact["name"]
-            if birthday_this_year not in birthdays_dict:
-                birthdays_dict[birthday_this_year] = name + ", " # for first date in dict
-            else:
-                birthdays_dict[birthday_this_year] += name + ", " # for second and next dates in dict
-
-    days_list = [i for i in birthdays_dict.keys()]
-
-    if len(days_list) == 0:
-        return f"\nNo one celebrates their birthday in next {BIRTHDATE_SCOPE} days. (((\nThrow a party for yourself!!!\n"
-
-    days_list.sort()
-
-    print_text = f"\nBirthdays in next {BIRTHDATE_SCOPE} days:\n-------------------------\n"
-
-    for day in days_list:
-        print_text += f"{str(day.strftime('%A'))+":":<12} {birthdays_dict[day].rstrip(', ')}\n"
-
-    print(print_text)
-
-
-
-def get_help():
-    '''
-    This function returns a user help data.
-    '''
-    help_string = 'Help will be in next version. )))'
-    print(help_string)
-
-
-
-def add_contact(name: str, args: tuple):
-    '''
-    This function recieves a tuple with a contact name and a tuple with phone numbers,
-    creates Record object, fills phone number and adds Record object to the AddressBook object.
-    '''
-    record = Record(name)
-    for phone in args:
-        record.add_phone(phone)
-    book.add_record(record)
-
-
-
-def change_contact(name: str, args: tuple):
-    '''
-    This function recieves a tuple with a contact name and a tuple with old and new phone numbers,
-    changes the old phone number to the new phone number.
-    '''
-    record = book.find(name)
-    old_phone = args[0]
-    new_phone = args[1]
-    record.edit_phone(old_phone, new_phone)
-
-
-
-def show_all():
-    '''
-    This function prints all Record object.
-    '''
-    print("\nYour contact(s):\n-------------------------\n")
-    for record in book.data.value():
-        print(record)
-
-
-
-def show_phone(name: str):
-    '''
-    This function recieves a contact name and print Record object.
-    '''
-    record = book.find(name)
-    print(record)
-
-
-
-def main():
-    '''
-    This is the function with a main wokr cycle for inputing of commands.
-    '''
-
-    print("Welcome to the assistant bot!\n")
-    while True:
-
-        # парсінг команд виконується стільки ж разів, скільки й головний цикл у main(),
-        # тому не бачу сенсу виділяти три рядки коду в окрему функцію і збільшувати кількість рядків з кодом
-        command, name, *args = input("Enter a command: ").strip().split()
-        command = command.strip().lower()
-        name = name.capitalize()
-        arguments = (*args,)
-
-        if command in ("close", "exit", 'quit', 'e', 'q'):
-            print("Good bye!")
-            break
-
-        elif command == "hello":
-            print("Hello! How can I help you?")
-
-        elif command == "all":
-            show_all()
-
-        elif command in ("help", 'h'):
-            get_help()       
-
-        elif command in ("birthdays", 'bd'):
-            get_birthdays_per_week()
-
-        elif command in ('add',):
-            add_contact(name, arguments)
-
-        elif command in ('change',):
-            change_contact(name, arguments)
-
-        elif command in ('phone',):
-            show_phone(name)
-
-        else:
-            print("Invalid command!")
-
-book = AddressBook()
-
-if __name__ == "__main__":
-    main()
