@@ -35,8 +35,8 @@ class Name(Field):
     """
     def __init__(self, value: str):
         super().__init__(self)
-        self.__value = value
-
+        self.value = value
+'''
     @property
     def value(self):
         return self.__value
@@ -47,6 +47,7 @@ class Name(Field):
             self.__value = new_value
         else:
             print("Name can't be empty and must contains characters only")
+            '''
 
 
 
@@ -59,8 +60,8 @@ class Phone(Field):
     """
     def __init__(self, value: str):
         super().__init__(self)
-        self.__value = value
-
+        self.value = value
+'''
     @property
     def value(self):
         return self.__value
@@ -71,7 +72,7 @@ class Phone(Field):
             self.__value = new_value
         else:
             print("Ten digit for phone numder only")
-
+'''
 
 
 class Birthday(Field):
@@ -83,8 +84,8 @@ class Birthday(Field):
     """
     def __init__(self, value: str):
         super().__init__(self)
-        self.__value = value
-
+        self.value = value
+'''
     @property
     def value(self):
         return self.__value
@@ -96,7 +97,7 @@ class Birthday(Field):
         else:
             print("Ten digit for phone numder only")
 
-
+'''
 
 class Record:
     '''
@@ -132,7 +133,7 @@ class Record:
             print(f'{self.name} have got the {new_phone} phone already.')
         else:
             self.phones.append(Phone(new_phone))
-            print(f'{new_phone} is added for {self.name} already.')
+            print(f'{new_phone} is added for {self.name}.')
 
     def edit_phone(self, old_phone: str, new_phone: str):
         '''
@@ -189,8 +190,8 @@ class Record:
             print(f'{self.name}\'s birthday is {self.birthday}.')
 
     def __str__(self):
-        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones).rstrip('; ')}"
-    
+        return f"Contact name: {self.name.value}, phones: {', '.join(p.value if p is not None else " " for p in self.phones).rstrip(', ')}\n"
+  
 
 
 class AddressBook(UserDict):
@@ -210,7 +211,12 @@ class AddressBook(UserDict):
         Recieve a 'name' string.
         Return from the dict a Record class object with key is 'name' string.
         '''
-        if name in self.data:
+        print('name=', name)
+        print('data=', self.data.keys())
+        print('data=', self.data.values())
+        #print('self.data[name]=', self.data[name])
+
+        if name in self.data.keys():
             return self.data[name]
 
     @input_error
@@ -237,7 +243,7 @@ class AddressBook(UserDict):
         if record:
             print(f'Sorry, but {record.name} is in your contact book already. ((')
         else:
-            self.data[new_name.name] = new_name
+            self.data[new_name.name.value] = new_name
             print(f'Contact {new_name.name} is added.')
     
     def get_birthdays_per_week(self):
@@ -249,6 +255,7 @@ class AddressBook(UserDict):
 
         if len(self.data) == 0:
             print('\nNobody is in your contact list. (((\n')
+            return
 
         BIRTHDATE_SCOPE = 7 # today and next 6 days
         WEEKENDS = (5, 6) # 5, 6 = saturday, sunday
@@ -281,6 +288,7 @@ class AddressBook(UserDict):
 
         if len(days_list) == 0:
             print(f"\nNo one celebrates their birthday in next {BIRTHDATE_SCOPE} days. (((\nThrow a party for yourself!!!\n")
+            return
 
         days_list.sort()
 
@@ -307,26 +315,31 @@ def main():
     This is the function with a main wokr cycle for inputing of commands.
     '''
 
-    print("Welcome to the assistant bot!\n")
+    print("\nWelcome to the assistant bot!\n")
     while True:
 
-        command, name, *args = input("Enter a command: ").strip().split()
+        parser_list = input("Enter a command: ").split()
+        for _ in range(3 - len(parser_list)):
+            parser_list.append(None)
+        command, name, *args = parser_list
+        if command is None:
+            print("\nCommand isn't entered! Enter it, please!\n")
+            continue
         command = command.strip().lower()
-        name = name.capitalize()
         arguments = (*args,)
         # парсінг команд виконується стільки ж разів, скільки й головний цикл у main(),
         # тому не бачу сенсу виділяти три рядки коду в окрему функцію і збільшувати кількість рядків з кодом
 
         if command in ("close", "exit", 'quit', 'e', 'q'):
-            print("Good bye!")
+            print("\nGood bye!\n")
             break
 
         elif command == "hello":
-            print("Hello! How can I help you?")
+            print("\nHello! How can I help you?\n")
 
         elif command == "all":
             print("\nYour contact(s):\n-------------------------\n")
-            for record in book.data.value():
+            for record in book.data.values():
                 print(record)
 
         elif command in ("help", 'h'):
@@ -355,7 +368,7 @@ def main():
             print(book.find(name))
 
         else:
-            print("Invalid command!")
+            print("\nInvalid command!\n")
 
 book = AddressBook()
 
