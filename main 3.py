@@ -1,4 +1,4 @@
-# import re
+import re
 from  datetime import datetime, timedelta
 from collections import UserDict
 
@@ -7,7 +7,7 @@ def input_error(func):
         try:
             return func(*args, **kwargs)
         except Exception:
-            print("Give me a valid (lenght > 0, only characters or digits) name\n and/or valid (ten digits) phone number please.")
+            print("Give me a valid (lenght > 0, only characters or digits) name\n and/or valid (ten digits)phone number\nand/or valid date (in dd.mm.yyyy format only) please.")
     return inner
 # other errors that cause an exception are not yet expected by logic
 
@@ -34,20 +34,20 @@ class Name(Field):
     Objects of the class is can processed as a specific item of the Record object.
     """
     def __init__(self, value: str):
-        super().__init__(self)
+        super().__init__(value)
+        self.__value = None
         self.value = value
-'''
+
     @property
     def value(self):
         return self.__value
 
     @value.setter
-    def value(self, new_value):
-        if new_value.isalfa() and new_value is not None:
-            self.__value = new_value
+    def value(self, value):
+        if re.search(r'^[a-zA-Z0-9]+$', value) is not None:
+            self.__value = value
         else:
-            print("Name can't be empty and must contains characters only")
-            '''
+            print("Name can't be empty and must contains characters only")            
 
 
 
@@ -59,20 +59,21 @@ class Phone(Field):
     Objects of the class is can processed as a specific item of the Record object.
     """
     def __init__(self, value: str):
-        super().__init__(self)
+        super().__init__(value)
+        self.__value = None
         self.value = value
-'''
+
     @property
     def value(self):
         return self.__value
 
     @value.setter
     def value(self, new_value):
-        if new_value.isdigit() and len(new_value) == 10:
+        if re.search(r'^\d{10}$', new_value):
             self.__value = new_value
         else:
             print("Ten digit for phone numder only")
-'''
+
 
 
 class Birthday(Field):
@@ -83,21 +84,27 @@ class Birthday(Field):
     Objects of the class is can processed as a specific item of the Record object.
     """
     def __init__(self, value: str):
-        super().__init__(self)
+        super().__init__(value)
+        # self._value = None
         self.value = value
-'''
-    @property
-    def value(self):
-        return self.__value
 
-    @value.setter
-    def value(self, new_value):
-        if new_value.isdigit() and len(new_value) == 10:###########################################################################
-            self.__value = new_value
-        else:
-            print("Ten digit for phone numder only")
+    # @property
+    # def value(self):
+    #     return self._value
 
-'''
+    # @value.setter
+    # def value(self, value):
+    #     if re.search(r'\b(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.(19\d\d|20\d\d)\b', value):
+    #         self.value = datetime(
+    #                 int(value[6:]),
+    #                 int(value[3:5]),
+    #                 int(value[0:2]),
+    #                 0, 0, 0,
+    #                 )
+    #     else:
+    #         print("Date in dd.mm.yyyy format only")    
+
+
 
 class Record:
     '''
@@ -122,7 +129,8 @@ class Record:
         for p in self.phones:
             if phone == p.value:
                 return p
-
+   
+    @input_error
     def add_phone(self, new_phone: str):
         '''
         Recieve a 'phone' string.
@@ -135,6 +143,7 @@ class Record:
             self.phones.append(Phone(new_phone))
             print(f'{new_phone} is added for {self.name}.')
 
+    @input_error
     def edit_phone(self, old_phone: str, new_phone: str):
         '''
         Recieve a 'old_phone' string.
@@ -142,6 +151,7 @@ class Record:
         add to the list a Phone class object with value is 'new_phone' string.
         Print message with confirmation.
         '''
+
         if old_phone == new_phone:
             print(f'{old_phone} is equal to {new_phone}.')
         else:
@@ -166,31 +176,36 @@ class Record:
         else:
             print(f'{self.name}\'s haven\'t got the {del_phone} phone number.')  
 
+    @input_error
     def add_birthday(self, birthday_string: str):
         '''
         Recieve a 'birthday_string' string.
         Change date in Birthday field.
-        If the Birthday field is None, then date is added formally.
         '''
-        self.birthday = datetime(
+        if re.search(r'\b(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.(19\d\d|20\d\d)\b', birthday_string):
+            self.birthday = Birthday(datetime(
                     int(birthday_string[6:]),
                     int(birthday_string[3:5]),
                     int(birthday_string[0:2]),
                     0, 0, 0,
-                    )
-        print(f'Birthday {birthday_string} is added for {self.name}.')
+                    ))
+            print(f'Birthday {birthday_string} is added for {self.name}.')
+        else:
+            print('The date is not valid')
 
-    def show_birtday(self):
+        
+
+    def show_birthday(self):
         '''
         Simply print birthday info.
         '''
         if self.birthday is None:
-            print(f'{self.name}\'s birthday is not specified.')
+            print(f'\n{self.name}\'s birthday is not specified.\n')
         else:
-            print(f'{self.name}\'s birthday is {self.birthday}.')
+            print(f'\n{self.name}\'s birthday is {self.birthday.value.strftime('%d.%m.%Y')}.\n')
 
     def __str__(self):
-        return f"Contact name: {self.name.value}, phones: {', '.join(p.value if p is not None else " " for p in self.phones).rstrip(', ')}\n"
+        return f"Contact name: {self.name.value}, phones: {', '.join(p.value if p.value is not None else " " for p in self.phones).rstrip(', ')}\n"
   
 
 
@@ -211,11 +226,7 @@ class AddressBook(UserDict):
         Recieve a 'name' string.
         Return from the dict a Record class object with key is 'name' string.
         '''
-        print('name=', name)
-        print('data=', self.data.keys())
-        print('data=', self.data.values())
-        #print('self.data[name]=', self.data[name])
-
+        
         if name in self.data.keys():
             return self.data[name]
 
@@ -264,10 +275,8 @@ class AddressBook(UserDict):
         birthdays_dict = dict()
         for record in self.data.values():
 
-            birthday = record.birthday
-
-            if birthday is not None: # checking for empty birthday
-                birthday_this_year = birthday.date().replace(year=today_date.year)
+            if record.birthday is not None: # checking for empty birthday
+                birthday_this_year = record.birthday.value.date().replace(year=today_date.year)
             else:
                 break
 
@@ -278,7 +287,8 @@ class AddressBook(UserDict):
             day_delta = (birthday_this_year - today_date).days # days from today to birthday
             if 0 <= day_delta and day_delta < BIRTHDATE_SCOPE:
 
-                name = record.name
+                name = record.name.value
+
                 if birthday_this_year not in birthdays_dict:
                     birthdays_dict[birthday_this_year] = name + ", " # for first date in dict
                 else:
@@ -314,6 +324,7 @@ def main():
     '''
     This is the function with a main wokr cycle for inputing of commands.
     '''
+    book = AddressBook()
 
     print("\nWelcome to the assistant bot!\n")
     while True:
@@ -355,14 +366,18 @@ def main():
             book.add_record(record)
 
         elif command in ('add-birthday',):
-            book.find(name).add_birthday(arguments)
+            book.find(name).add_birthday(arguments[0])
 
         elif command in ('show-birthday',):
             book.find(name).show_birthday()
 
         elif command in ('change',):
-            old_phone = arguments[0], new_phone = arguments[1]
-            book.find(name).edit_phone(old_phone, new_phone)
+            if len(arguments) == 2:
+                old_phone = arguments[0]
+                new_phone = arguments[1]
+                book.find(name).edit_phone(old_phone, new_phone)
+            else:
+                print('Old and new phone numbers isn\'t enter correctly')
     
         elif command in ('phone',):
             print(book.find(name))
